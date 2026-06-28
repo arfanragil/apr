@@ -1,7 +1,12 @@
 import { createClient } from '@/utils/supabase/server'
 import DashboardClient from './dashboard-client'
+import { getUserRole } from '@/lib/auth-server'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
+  const { role } = await getUserRole()
+
+
   const supabase = createClient()
 
   const currentMonth = new Date().getMonth() + 1
@@ -124,6 +129,7 @@ export default async function DashboardPage() {
       chartData={chartData} 
       recentTransactions={allTransactions}
       recentUnpaid={recentUnpaid}
+      role={role}
     />
   )
 }

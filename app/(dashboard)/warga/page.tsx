@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import WargaClient from './warga-client'
+import { requireAdminOrPengurus } from '@/lib/auth-server'
 
 export default async function WargaPage() {
+  await requireAdminOrPengurus()
   const supabase = createClient()
   
   const [usersRes, rolesRes] = await Promise.all([

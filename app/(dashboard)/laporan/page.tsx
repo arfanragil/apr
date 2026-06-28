@@ -1,12 +1,14 @@
 import { createClient } from '@/utils/supabase/server'
 import LaporanClient from './laporan-client'
 import { getAppSettings } from '@/lib/settings'
+import { requireAdminOrPengurus } from '@/lib/auth-server'
 
 export default async function LaporanPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
+  await requireAdminOrPengurus()
   const supabase = createClient()
 
   const currentMonth = new Date().getMonth() + 1

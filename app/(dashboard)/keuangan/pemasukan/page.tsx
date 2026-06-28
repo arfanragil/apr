@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import PemasukanClient from './pemasukan-client'
+import { requireAdminOrPengurus } from '@/lib/auth-server'
 
 export default async function PemasukanPage() {
+  await requireAdminOrPengurus()
   const supabase = createClient()
   
   const [incomesRes, categoriesRes] = await Promise.all([

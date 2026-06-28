@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import TagihanClient from './tagihan-client'
+import { requireAdminOrPengurus } from '@/lib/auth-server'
 
 export default async function TagihanPage() {
+  await requireAdminOrPengurus()
   const supabase = createClient()
   
   const { data: bills, error } = await supabase

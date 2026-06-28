@@ -43,12 +43,14 @@ export default function DashboardClient({
   stats, 
   chartData,
   recentTransactions,
-  recentUnpaid
+  recentUnpaid,
+  role
 }: { 
   stats: Stats, 
   chartData: ChartData,
   recentTransactions: Transaction[],
-  recentUnpaid: UnpaidBill[]
+  recentUnpaid: UnpaidBill[],
+  role: string
 }) {
 
   return (
@@ -61,12 +63,16 @@ export default function DashboardClient({
           <p className="text-gray-500 text-sm mt-1">Ringkasan kondisi keuangan perumahan bulan ini.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/keuangan/tagihan" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-colors">
-            Kelola Tagihan
-          </Link>
-          <Link href="/laporan" className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 shadow-sm transition-colors">
-            Laporan Lengkap
-          </Link>
+          {role !== 'warga' && (
+            <>
+              <Link href="/keuangan/tagihan" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-colors">
+                Kelola Tagihan
+              </Link>
+              <Link href="/laporan" className="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 shadow-sm transition-colors">
+                Laporan Lengkap
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
@@ -182,9 +188,11 @@ export default function DashboardClient({
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-gray-900">Transaksi Terbaru</h3>
-            <Link href="/laporan" className="text-xs text-blue-600 font-medium hover:underline">
-              Lihat Semua
-            </Link>
+            {role !== 'warga' && (
+              <Link href="/laporan" className="text-xs text-blue-600 font-medium hover:underline">
+                Lihat Semua
+              </Link>
+            )}
           </div>
           
           <div className="flex-1 space-y-4">
@@ -217,9 +225,11 @@ export default function DashboardClient({
             <h3 className="font-bold text-gray-900">Perlu Perhatian (Tagihan Tertunggak / Menunggu Verifikasi)</h3>
             <p className="text-xs text-gray-500 mt-1">5 tagihan terbaru yang memerlukan tindak lanjut.</p>
           </div>
-          <Link href="/keuangan/tagihan" className="text-xs text-blue-600 font-medium hover:underline">
-            Kelola Tagihan
-          </Link>
+          {role !== 'warga' && (
+            <Link href="/keuangan/tagihan" className="text-xs text-blue-600 font-medium hover:underline">
+              Kelola Tagihan
+            </Link>
+          )}
         </div>
         
         <div className="overflow-x-auto">
@@ -264,9 +274,13 @@ export default function DashboardClient({
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link href="/keuangan/tagihan" className="text-xs font-medium text-blue-600 hover:underline">
-                        Lihat Detail
-                      </Link>
+                      {role === 'warga' ? (
+                         <span className="text-xs text-gray-400 italic">Hanya Lihat</span>
+                      ) : (
+                        <Link href="/keuangan/tagihan" className="text-xs font-medium text-blue-600 hover:underline">
+                          Lihat Detail
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 ))

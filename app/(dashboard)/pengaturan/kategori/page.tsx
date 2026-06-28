@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import KategoriClient from './kategori-client'
+import { requireAdmin } from '@/lib/auth-server'
 
 export default async function KategoriPage() {
+  await requireAdmin()
   const supabase = createClient()
   
   const [incomesRes, expensesRes] = await Promise.all([

@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import AplikasiClient from './aplikasi-client'
+import { requireAdmin } from '@/lib/auth-server'
 
 export default async function AplikasiPage() {
+  await requireAdmin()
   const supabase = createClient()
   
   const { data: settings } = await supabase

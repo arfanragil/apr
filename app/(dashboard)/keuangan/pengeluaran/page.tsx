@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server'
 import PengeluaranClient from './pengeluaran-client'
+import { requireAdminOrPengurus } from '@/lib/auth-server'
 
 export default async function PengeluaranPage() {
+  await requireAdminOrPengurus()
   const supabase = createClient()
   
   const [expensesRes, categoriesRes] = await Promise.all([
@@ -12,7 +14,7 @@ export default async function PengeluaranPage() {
         expense_categories(name),
         users!expenses_created_by_fkey(full_name)
       `)
-      .order('date_spent', { ascending: false }),
+      .order('date', { ascending: false }),
     supabase
       .from('expense_categories')
       .select('*')
