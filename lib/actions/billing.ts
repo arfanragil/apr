@@ -26,7 +26,6 @@ export async function generateMonthlyBills(formData: FormData) {
     const excludedRoleIds = excludedRoles?.map(r => r.id) || []
 
     // 2. Dapatkan warga aktif (User dengan role selain Admin/Superadmin)
-    let query = supabase.from('users').select('id')
     if (excludedRoleIds.length > 0) {
       // Supabase .not().in() is not directly supported this way, but we can use .not('role_id', 'in', `(${excludedRoleIds.join(',')})`) 
       // or fetch all and filter in JS for simplicity since residents count is usually < 1000.
@@ -65,9 +64,9 @@ export async function generateMonthlyBills(formData: FormData) {
 
     revalidatePath('/keuangan/tagihan')
     return { success: true, message: `Berhasil membuat tagihan untuk ${usersToBill.length} warga.` }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating bills:', error)
-    return { success: false, message: error.message }
+    return { success: false, message: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 
@@ -121,7 +120,7 @@ export async function approveBill(billId: string) {
   if (error) return { error: error.message }
   
   // 4. Insert ke incomes
-  const transactionNumber = `IPL-${bill.month}${bill.year}-${(bill.users as any)?.house_number || 'X'}`
+  const transactionNumber = `IPL-${bill.month}${bill.year}-${(bill.users as Record<string, string>)?.house_number || 'X'}`
   
   // Cek apakah sudah terinsert (menghindari duplikasi jika diklik 2x)
   const { data: existingIncome } = await supabase.from('incomes').select('id').eq('transaction_number', transactionNumber).single()
@@ -132,7 +131,7 @@ export async function approveBill(billId: string) {
       date: new Date().toISOString().split('T')[0],
       category_id: categoryId,
       amount: bill.amount,
-      description: `Pembayaran IPL ${bill.month}/${bill.year} - ${(bill.users as any)?.full_name} (${(bill.users as any)?.house_number})`,
+      description: `Pembayaran IPL ${bill.month}/${bill.year} - ${(bill.users as Record<string, string>)?.full_name} (${(bill.users as Record<string, string>)?.house_number})`,
       created_by: bill.user_id
     })
   }

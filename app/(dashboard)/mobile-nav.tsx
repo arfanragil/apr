@@ -7,7 +7,7 @@ import { Home, Users, DollarSign, BarChart3, Settings, X, ChevronRight } from 'l
 
 type NavItem = {
   href: string
-  icon: any
+  icon: React.ElementType
   label: string
   roles: string[]
   subItems?: { href: string; label: string; roles: string[] }[]

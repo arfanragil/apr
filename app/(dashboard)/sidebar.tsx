@@ -4,14 +4,14 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, FileText, CreditCard, Settings, LogOut, Menu, BarChart3, ChevronDown, ChevronRight, DollarSign } from 'lucide-react'
+import { Home, Users, FileText, CreditCard, Settings, LogOut, BarChart3, ChevronDown, ChevronRight, DollarSign } from 'lucide-react'
 import { logout } from '@/lib/actions/auth'
 
 export type Role = 'superadmin' | 'admin' | 'pengurus' | 'warga' | string
 
 type NavItem = {
   href: string
-  icon: any
+  icon: React.ElementType
   label: string
   roles: string[]
   subItems?: { href: string; label: string; roles: string[] }[]

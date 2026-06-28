@@ -18,7 +18,7 @@ export async function adminCreateUser(formData: FormData) {
 
     const adminAuthClient = createAdminClient().auth
 
-    const { data, error } = await adminAuthClient.admin.createUser({
+    const { error } = await adminAuthClient.admin.createUser({
       email: email,
       password: password,
       email_confirm: true,
@@ -38,8 +38,8 @@ export async function adminCreateUser(formData: FormData) {
     revalidatePath('/warga')
     revalidatePath('/pengaturan/user')
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
 
@@ -53,7 +53,7 @@ export async function adminDeleteUser(userId: string) {
     revalidatePath('/warga')
     revalidatePath('/pengaturan/user')
     return { success: true }
-  } catch (error: any) {
-    return { error: error.message }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }
