@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CheckCircle2, Search, Filter, AlertCircle, CreditCard, UploadCloud, X, Clock, Printer } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { uploadProof } from '@/lib/actions/billing'
+import imageCompression from 'browser-image-compression'
 
 type Bill = {
   id: string
@@ -45,13 +46,23 @@ export default function IplWargaClient({ bills }: { bills: Bill[] }) {
     setUploadError('')
 
     try {
+      let fileToUpload = file
+      if (file.type.startsWith('image/')) {
+        const options = {
+          maxSizeMB: 0.3,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        }
+        fileToUpload = await imageCompression(file, options)
+      }
+
       const fileExt = file.name.split('.').pop()
       const fileName = `bill_${selectedBill.id}_${Math.random()}.${fileExt}`
       const filePath = `proofs/${fileName}`
 
       const { error: uploadErr } = await supabase.storage
         .from('finance')
-        .upload(filePath, file)
+        .upload(filePath, fileToUpload)
         
       if (uploadErr) {
         throw new Error('Gagal upload bukti bayar: ' + uploadErr.message + '. Pastikan bucket "finance" sudah dibuat di Supabase.')

@@ -5,6 +5,7 @@ import { Plus, Search, Filter, CheckCircle2, AlertCircle, Clock, Paperclip, Chec
 import { generateMonthlyBills, approveBill, uploadProof } from '@/lib/actions/billing'
 import { createClient } from '@/utils/supabase/client'
 import * as XLSX from 'xlsx'
+import imageCompression from 'browser-image-compression'
 
 type Bill = {
   id: string
@@ -102,13 +103,23 @@ export default function TagihanClient({ initialData }: { initialData: Bill[] }) 
     setUploadError('')
 
     try {
+      let fileToUpload = file
+      if (file.type.startsWith('image/')) {
+        const options = {
+          maxSizeMB: 0.3,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        }
+        fileToUpload = await imageCompression(file, options)
+      }
+
       const fileExt = file.name.split('.').pop()
       const fileName = `bill_${selectedBill.id}_${Math.random()}.${fileExt}`
       const filePath = `proofs/${fileName}`
 
       const { error: uploadErr } = await supabase.storage
         .from('finance')
-        .upload(filePath, file)
+        .upload(filePath, fileToUpload)
         
       if (uploadErr) {
         throw new Error('Gagal upload bukti bayar: ' + uploadErr.message)

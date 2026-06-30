@@ -5,6 +5,7 @@ import { Plus, Search, Filter, Trash2, X, Download, FileSpreadsheet, Paperclip }
 import { addExpense, deleteExpense } from '@/lib/actions/expenses'
 import * as XLSX from 'xlsx'
 import { createClient } from '@/utils/supabase/client'
+import imageCompression from 'browser-image-compression'
 
 type Category = { id: string, name: string }
 type Expense = {
@@ -65,13 +66,23 @@ export default function PengeluaranClient({ initialData, categories }: { initial
     // Handle File Upload if exists
     if (file) {
       try {
+        let fileToUpload = file
+        if (file.type.startsWith('image/')) {
+          const options = {
+            maxSizeMB: 0.3,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true
+          }
+          fileToUpload = await imageCompression(file, options)
+        }
+
         const fileExt = file.name.split('.').pop()
         const fileName = `${Math.random()}.${fileExt}`
         const filePath = `receipts/${fileName}`
 
         const { error: uploadErr, data } = await supabase.storage
           .from('finance')
-          .upload(filePath, file)
+          .upload(filePath, fileToUpload)
           
         if (uploadErr) {
           throw new Error('Gagal upload nota: ' + uploadErr.message + '. Pastikan bucket "finance" sudah dibuat di Supabase.')
