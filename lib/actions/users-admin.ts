@@ -58,6 +58,20 @@ export async function adminDeleteUser(userId: string) {
     
     revalidatePath('/warga')
     revalidatePath('/pengaturan/user')
+    revalidatePath('/pengaturan/user')
+    return { success: true }
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : 'Unknown error' }
+  }
+}
+
+export async function adminResetUserPassword(userId: string) {
+  try {
+    const adminAuthClient = createAdminClient().auth
+    const { error } = await adminAuthClient.admin.updateUserById(userId, { password: '123456' })
+    
+    if (error) return { error: error.message }
+    
     return { success: true }
   } catch (error: unknown) {
     return { error: error instanceof Error ? error.message : 'Unknown error' }

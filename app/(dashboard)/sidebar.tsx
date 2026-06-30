@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, FileText, CreditCard, Settings, LogOut, BarChart3, ChevronDown, ChevronRight, DollarSign } from 'lucide-react'
+import { Home, Users, FileText, CreditCard, Settings, LogOut, BarChart3, ChevronDown, ChevronRight, DollarSign, UserCircle } from 'lucide-react'
 import { logout } from '@/lib/actions/auth'
 
 export type Role = 'superadmin' | 'admin' | 'pengurus' | 'warga' | string
@@ -22,7 +22,6 @@ export default function Sidebar({ roles, appName = 'AlifPark' }: { roles: string
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     '/keuangan': pathname.startsWith('/keuangan')
   })
-
   const toggleMenu = (href: string) => {
     setOpenMenus(prev => ({ ...prev, [href]: !prev[href] }))
   }
@@ -30,6 +29,7 @@ export default function Sidebar({ roles, appName = 'AlifPark' }: { roles: string
   // Menu Definition based on Role
   const navItems: NavItem[] = [
     { href: '/dashboard', icon: Home, label: 'Dashboard', roles: ['superadmin', 'admin', 'pengurus', 'warga'] },
+    { href: '/profil', icon: UserCircle, label: 'Profil Saya', roles: ['superadmin', 'admin', 'pengurus', 'warga'] },
     { href: '/warga', icon: Users, label: 'Warga', roles: ['superadmin', 'admin', 'pengurus'] },
     { 
       href: '/keuangan', icon: DollarSign, label: 'Keuangan', roles: ['superadmin', 'admin', 'pengurus', 'warga'],
@@ -130,7 +130,7 @@ export default function Sidebar({ roles, appName = 'AlifPark' }: { roles: string
           })}
         </nav>
 
-        <div className="p-4 border-t border-gray-100">
+        <div className="p-4 border-t border-gray-100 flex flex-col gap-1">
           <form action={logout}>
             <button className="flex w-full items-center gap-3 px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors">
               <LogOut size={20} /> Keluar

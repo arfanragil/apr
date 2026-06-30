@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Search, Filter, AlertCircle, CreditCard, UploadCloud, X, Clock } from 'lucide-react'
+import { CheckCircle2, Search, Filter, AlertCircle, CreditCard, UploadCloud, X, Clock, Printer } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { uploadProof } from '@/lib/actions/billing'
 
@@ -159,7 +159,17 @@ export default function IplWargaClient({ bills }: { bills: Bill[] }) {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right flex justify-end items-center gap-2">
+                      <a 
+                        href={`/invoice/${bill.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 shadow-sm rounded-lg hover:bg-gray-50 transition-colors"
+                        title="Lihat Invoice"
+                      >
+                        <Printer size={14} /> Invoice
+                      </a>
+
                       {bill.status === 'Belum Bayar' ? (
                         <button 
                           onClick={() => {
@@ -171,9 +181,9 @@ export default function IplWargaClient({ bills }: { bills: Bill[] }) {
                           <UploadCloud size={14} /> Upload Bukti
                         </button>
                       ) : bill.status === 'Menunggu Verifikasi' ? (
-                        <span className="text-xs text-yellow-600 font-medium italic">Menunggu...</span>
+                        <span className="text-xs text-yellow-600 font-medium italic px-2">Menunggu...</span>
                       ) : (
-                        <span className="text-xs text-gray-400 font-medium italic">Lunas</span>
+                        <span className="text-xs text-green-600 font-medium italic px-2">Lunas</span>
                       )}
                     </td>
                   </tr>

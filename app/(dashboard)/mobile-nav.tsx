@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Users, DollarSign, BarChart3, Settings, X, ChevronRight } from 'lucide-react'
+import { Home, Users, DollarSign, BarChart3, Settings, X, ChevronRight, UserCircle } from 'lucide-react'
 
 type NavItem = {
   href: string
@@ -19,6 +19,7 @@ export default function MobileNav({ roles }: { roles: string[] }) {
 
   const navItems: NavItem[] = [
     { href: '/dashboard', icon: Home, label: 'Beranda', roles: ['superadmin', 'admin', 'pengurus', 'warga'] },
+    { href: '/profil', icon: UserCircle, label: 'Profil', roles: ['superadmin', 'admin', 'pengurus', 'warga'] },
     { 
       href: '/keuangan', icon: DollarSign, label: 'Keuangan', roles: ['superadmin', 'admin', 'pengurus', 'warga'],
       subItems: [

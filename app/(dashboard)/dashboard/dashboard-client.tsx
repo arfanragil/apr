@@ -174,7 +174,7 @@ export default function DashboardClient({
                 <Tooltip 
                   cursor={{ fill: '#f9fafb' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, '']}
+                  formatter={(value: any) => [`Rp ${Number(value).toLocaleString('id-ID')}`, '']}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
                 <Bar dataKey="pemasukan" name="Pemasukan" fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={40} />

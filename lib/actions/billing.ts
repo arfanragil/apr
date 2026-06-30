@@ -19,7 +19,9 @@ export async function generateMonthlyBills(formData: FormData) {
     const iuranSampah = parseInt(settings?.find(s => s.key === 'iuran_sampah')?.value || '20000')
     const defaultAmount = iuranDasar + iuranKas + iuranSampah
 
-    const dueDate = `${year}-${String(month).padStart(2, '0')}-10` // Default jatuh tempo tgl 10
+    const dueDateDayStr = settings?.find(s => s.key === 'due_date_day')?.value || '10'
+    const dueDateDay = String(dueDateDayStr).padStart(2, '0')
+    const dueDate = `${year}-${String(month).padStart(2, '0')}-${dueDateDay}` // Jatuh tempo dinamis
 
     // 1. Dapatkan role Admin dan Superadmin untuk di-skip
     const { data: excludedRoles } = await supabase.from('roles').select('id').in('name', ['Admin', 'Superadmin'])

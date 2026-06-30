@@ -1,12 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Save, Building2, Coins } from 'lucide-react'
+import { CheckCircle2, Save, Building2, Coins, AlertTriangle } from 'lucide-react'
 import { updateMultipleSettings } from '@/lib/actions/settings'
+import { resetBukuTahunan } from '@/lib/actions/bookkeeping'
 
 export default function AplikasiClient({ initialSettings }: { initialSettings: Record<string, string> }) {
   const [showSuccess, setShowSuccess] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
+
+  const handleResetBuku = async () => {
+    if (confirm('PERINGATAN KERAS: Apakah Anda yakin ingin melakukan Tutup Buku?\n\nSemua data tagihan Lunas, pengeluaran, pemasukan, dan foto bukti bayar akan DIHAPUS PERMANEN. Tindakan ini tidak dapat dibatalkan!')) {
+      if (confirm('KONFIRMASI TERAKHIR: Anda benar-benar yakin ingin menghapus data lama?')) {
+        setIsResetting(true)
+        const res = await resetBukuTahunan()
+        setIsResetting(false)
+        if (res.success) {
+          alert(res.message)
+        } else {
+          alert(res.message || 'Gagal melakukan Tutup Buku')
+        }
+      }
+    }
+  }
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -136,6 +153,17 @@ export default function AplikasiClient({ initialSettings }: { initialSettings: R
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-gray-900"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tgl Jatuh Tempo (Setiap Bulan)</label>
+                <input 
+                  type="number" 
+                  name="due_date_day"
+                  min="1"
+                  max="28"
+                  defaultValue={initialSettings['due_date_day'] || '10'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-gray-900"
+                />
+              </div>
             </div>
           </div>
 
@@ -149,6 +177,30 @@ export default function AplikasiClient({ initialSettings }: { initialSettings: R
         </div>
 
       </form>
+
+      {/* Kolom Bahaya (Danger Zone) */}
+      <div className="mt-8 bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-red-700 flex items-center gap-2">
+              <AlertTriangle size={20} /> Danger Zone: Tutup Buku Tahunan
+            </h3>
+            <p className="text-red-600 text-sm mt-1 max-w-2xl leading-relaxed">
+              Fungsi ini akan <strong>menghapus secara permanen</strong> seluruh histori pemasukan, pengeluaran, dan tagihan warga (yang berstatus Lunas), beserta semua foto buktinya dari server. Saldo kas saat ini akan dihitung otomatis dan dimasukkan sebagai "Saldo Awal Pembukuan Baru". 
+              <br/><br/>
+              <strong>Catatan:</strong> Tagihan yang statusnya "Belum Bayar" tidak akan ikut terhapus sehingga warga masih tetap wajib membayarnya.
+            </p>
+          </div>
+          <button 
+            type="button"
+            onClick={handleResetBuku}
+            disabled={isResetting}
+            className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 disabled:opacity-70 whitespace-nowrap shadow-sm"
+          >
+            {isResetting ? 'Memproses...' : 'Tutup Buku Sekarang'}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Filter, Edit, Trash2, X, ShieldAlert } from 'lucide-react'
-import { adminCreateUser, adminDeleteUser } from '@/lib/actions/users-admin'
+import { Plus, Search, Filter, Edit, Trash2, X, ShieldAlert, KeyRound } from 'lucide-react'
+import { adminCreateUser, adminDeleteUser, adminResetUserPassword } from '@/lib/actions/users-admin'
 import { updateUser } from '@/lib/actions/users'
 
 type Role = { id: string, name: string }
@@ -15,6 +15,7 @@ type User = {
   roles: { name: string }
   role_id: string
   is_occupied?: boolean
+  status?: string
 }
 
 export default function WargaClient({ initialUsers, roles }: { initialUsers: User[], roles: Role[] }) {
@@ -56,6 +57,17 @@ export default function WargaClient({ initialUsers, roles }: { initialUsers: Use
     if (confirm('Yakin ingin menghapus pengguna ini beserta semua data tagihannya?')) {
       const res = await adminDeleteUser(id)
       if (res.error) alert(res.error)
+    }
+  }
+
+  async function handleResetPassword(id: string, name: string) {
+    if (confirm(`Yakin ingin mereset password ${name} menjadi "123456"?`)) {
+      const res = await adminResetUserPassword(id)
+      if (res.error) {
+        alert(res.error)
+      } else {
+        alert(`Password ${name} berhasil direset menjadi 123456.`)
+      }
     }
   }
 
@@ -145,10 +157,13 @@ export default function WargaClient({ initialUsers, roles }: { initialUsers: Use
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => setEditUser(user)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
+                        <button onClick={() => handleResetPassword(user.id, user.full_name)} title="Reset Password" className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors">
+                          <KeyRound size={16} />
+                        </button>
+                        <button onClick={() => setEditUser(user)} title="Edit" className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors">
                           <Edit size={16} />
                         </button>
-                        <button onClick={() => handleDelete(user.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                        <button onClick={() => handleDelete(user.id)} title="Hapus" className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors">
                           <Trash2 size={16} />
                         </button>
                       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Filter, CheckCircle2, AlertCircle, Clock, Paperclip, Check, UploadCloud, X } from 'lucide-react'
+import { Plus, Search, Filter, CheckCircle2, AlertCircle, Clock, Paperclip, Check, UploadCloud, X, Printer } from 'lucide-react'
 import { generateMonthlyBills, approveBill, uploadProof } from '@/lib/actions/billing'
 import { createClient } from '@/utils/supabase/client'
 import * as XLSX from 'xlsx'
@@ -265,6 +265,16 @@ export default function TagihanClient({ initialData }: { initialData: Bill[] }) 
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
+                      <a 
+                        href={`/invoice/${item.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-200 shadow-sm rounded-lg hover:bg-gray-50 transition-colors mr-2"
+                        title="Cetak Invoice"
+                      >
+                        <Printer size={14} /> Cetak
+                      </a>
+                      
                       {item.status === 'Menunggu Verifikasi' && (
                         <button 
                           onClick={() => handleApprove(item.id)} 

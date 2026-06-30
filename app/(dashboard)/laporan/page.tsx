@@ -61,7 +61,7 @@ export default async function LaporanPage({
         id: `inc-${inc.transaction_number}`,
         type: 'Pemasukan',
         date: inc.date,
-        kategori: inc.income_categories?.name || '-',
+        kategori: (inc.income_categories as any)?.name || '-',
         deskripsi: inc.description,
         nominal: amt,
         pic: (inc.users as any)?.full_name || '-'
@@ -78,7 +78,7 @@ export default async function LaporanPage({
         id: `exp-${exp.transaction_number}`,
         type: 'Pengeluaran',
         date: exp.date,
-        kategori: exp.expense_categories?.name || '-',
+        kategori: (exp.expense_categories as any)?.name || '-',
         deskripsi: exp.description,
         nominal: amt,
         pic: (exp.users as any)?.full_name || '-'

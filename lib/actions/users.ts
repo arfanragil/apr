@@ -39,3 +39,32 @@ export async function updateUser(formData: FormData) {
   revalidatePath('/warga')
   return { success: true }
 }
+
+export async function updateMyProfile(formData: FormData) {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Belum login' }
+
+  const full_name = formData.get('full_name') as string
+  const phone_number = formData.get('phone_number') as string
+  const house_number = formData.get('house_number') as string
+
+  if (!full_name) return { error: 'Nama lengkap wajib diisi' }
+
+  const { error } = await supabase
+    .from('users')
+    .update({
+      full_name,
+      phone_number,
+      house_number,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', user.id)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/profil')
+  return { success: true }
+}

@@ -55,3 +55,20 @@ export async function logout() {
   await supabase.auth.signOut()
   redirect('/login')
 }
+
+export async function updateUserPassword(formData: FormData) {
+  const supabase = createClient()
+  const password = formData.get('password') as string
+
+  if (!password || password.length < 6) {
+    return { error: 'Password minimal 6 karakter.' }
+  }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { success: true }
+}
