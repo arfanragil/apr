@@ -11,6 +11,7 @@ export async function adminCreateUser(formData: FormData) {
     const phone = formData.get('phone_number') as string
     const house = formData.get('house_number') as string
     const roleId = formData.get('role_id') as string
+    const isOccupied = formData.get('is_occupied') === 'true'
 
     if (!email || !password || !fullName || !roleId) {
       return { error: 'Data wajib (Email, Password, Nama, Role) harus diisi' }
@@ -18,7 +19,7 @@ export async function adminCreateUser(formData: FormData) {
 
     const adminAuthClient = createAdminClient().auth
 
-    const { error } = await adminAuthClient.admin.createUser({
+    const { data, error } = await adminAuthClient.admin.createUser({
       email: email,
       password: password,
       email_confirm: true,
@@ -33,6 +34,11 @@ export async function adminCreateUser(formData: FormData) {
     if (error) {
       console.error('Error creating user via admin:', error)
       return { error: error.message }
+    }
+
+    if (data?.user?.id) {
+      const supabase = createAdminClient()
+      await supabase.from('users').update({ is_occupied: isOccupied }).eq('id', data.user.id)
     }
 
     revalidatePath('/warga')

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Filter, CheckCircle2, AlertCircle, Clock, Paperclip, Check } from 'lucide-react'
-import { generateMonthlyBills, approveBill } from '@/lib/actions/billing'
+import { Plus, Search, Filter, CheckCircle2, AlertCircle, Clock, Paperclip, Check, UploadCloud, X } from 'lucide-react'
+import { generateMonthlyBills, approveBill, uploadProof } from '@/lib/actions/billing'
+import { createClient } from '@/utils/supabase/client'
 import * as XLSX from 'xlsx'
 
 type Bill = {
@@ -21,9 +22,17 @@ type Bill = {
 }
 
 export default function TagihanClient({ initialData }: { initialData: Bill[] }) {
+  const supabase = createClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
+  
+  // State for Upload Modal
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [uploadError, setUploadError] = useState('')
 
   // Filter logic
   const filteredData = initialData.filter(item => {
@@ -83,6 +92,47 @@ export default function TagihanClient({ initialData }: { initialData: Bill[] }) 
     menunggu: filteredData.filter(b => b.status === 'Menunggu Verifikasi').length,
     belum: filteredData.filter(b => b.status === 'Belum Bayar').length,
     lunas: filteredData.filter(b => b.status === 'Lunas').length,
+  }
+
+  const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!selectedBill || !file) return
+
+    setIsSubmitting(true)
+    setUploadError('')
+
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `bill_${selectedBill.id}_${Math.random()}.${fileExt}`
+      const filePath = `proofs/${fileName}`
+
+      const { error: uploadErr } = await supabase.storage
+        .from('finance')
+        .upload(filePath, file)
+        
+      if (uploadErr) {
+        throw new Error('Gagal upload bukti bayar: ' + uploadErr.message)
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('finance')
+        .getPublicUrl(filePath)
+        
+      const res = await uploadProof(selectedBill.id, publicUrl)
+      if (res.error) throw new Error(res.error)
+      
+      // Langsung approve otomatis karena yang upload admin/pengurus
+      await approveBill(selectedBill.id)
+
+      setIsModalOpen(false)
+      setSelectedBill(null)
+      setFile(null)
+      alert("Bukti pembayaran berhasil diupload dan tagihan dinyatakan Lunas!")
+    } catch (err: any) {
+      setUploadError(err.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -223,6 +273,17 @@ export default function TagihanClient({ initialData }: { initialData: Bill[] }) 
                           <Check size={14} /> Approve
                         </button>
                       )}
+                      {item.status === 'Belum Bayar' && (
+                        <button 
+                          onClick={() => {
+                            setSelectedBill(item)
+                            setIsModalOpen(true)
+                          }} 
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <UploadCloud size={14} /> Upload / Lunas
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -231,6 +292,54 @@ export default function TagihanClient({ initialData }: { initialData: Bill[] }) 
           </table>
         </div>
       </div>
+
+      {/* Modal Upload Bukti Admin */}
+      {isModalOpen && selectedBill && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h3 className="font-bold text-lg">Upload Bukti / Terima Tunai</h3>
+              <button onClick={() => { setIsModalOpen(false); setSelectedBill(null); setFile(null); setUploadError(''); }} className="text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleUpload} className="p-4 space-y-4">
+              {uploadError && (
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200">
+                  {uploadError}
+                </div>
+              )}
+              
+              <div className="p-3 bg-blue-50 text-blue-800 rounded-lg text-sm border border-blue-100">
+                <p>Warga: <strong>{selectedBill.users?.full_name} ({selectedBill.users?.house_number})</strong></p>
+                <p>Tagihan IPL: <strong>Bulan {selectedBill.month} Tahun {selectedBill.year}</strong></p>
+                <p className="font-bold mt-1 text-base">Rp {selectedBill.amount.toLocaleString('id-ID')}</p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-700">Pilih File Bukti Transfer / Kwitansi *</label>
+                <input 
+                  type="file" 
+                  accept="image/*,.pdf"
+                  required
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none" 
+                />
+              </div>
+              
+              <div className="pt-4 mt-6 border-t border-gray-100 flex justify-end gap-2">
+                <button type="button" onClick={() => { setIsModalOpen(false); setSelectedBill(null); setFile(null); setUploadError(''); }} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                  Batal
+                </button>
+                <button type="submit" disabled={isSubmitting || !file} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-70 flex items-center gap-2">
+                  {isSubmitting ? 'Memproses...' : <><Check size={16}/> Upload & Lunaskan</>}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

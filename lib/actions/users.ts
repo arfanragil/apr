@@ -12,6 +12,7 @@ export async function updateUser(formData: FormData) {
   const house_number = formData.get('house_number') as string
   const role_id = formData.get('role_id') as string
   const status = formData.get('status') as string
+  const is_occupied = formData.get('is_occupied') === 'true'
 
   if (!id || !full_name || !role_id) {
     return { error: 'Data wajib harus diisi' }
@@ -25,6 +26,7 @@ export async function updateUser(formData: FormData) {
       house_number,
       role_id,
       status,
+      is_occupied,
       updated_at: new Date().toISOString()
     })
     .eq('id', id)

@@ -31,7 +31,7 @@ export async function generateMonthlyBills(formData: FormData) {
       // or fetch all and filter in JS for simplicity since residents count is usually < 1000.
     }
     
-    const { data: users, error: resError } = await supabase.from('users').select('id, role_id')
+    const { data: users, error: resError } = await supabase.from('users').select('id, role_id, is_occupied')
     if (resError) throw resError
 
     const residents = users?.filter(u => !excludedRoleIds.includes(u.role_id)) || []
@@ -49,14 +49,19 @@ export async function generateMonthlyBills(formData: FormData) {
 
     // 4. Siapkan data tagihan massal
     if (usersToBill.length > 0) {
-      const bills = usersToBill.map((r) => ({
-        user_id: r.id,
-        month: month,
-        year: year,
-        amount: defaultAmount,
-        due_date: dueDate,
-        status: 'Belum Bayar'
-      }))
+      const bills = usersToBill.map((r) => {
+        const isOccupied = r.is_occupied ?? true
+        const userAmount = iuranDasar + iuranKas + (isOccupied ? iuranSampah : 0)
+        
+        return {
+          user_id: r.id,
+          month: month,
+          year: year,
+          amount: userAmount,
+          due_date: dueDate,
+          status: 'Belum Bayar'
+        }
+      })
 
       const { error: insertError } = await supabase.from('bills').insert(bills)
       if (insertError) throw insertError

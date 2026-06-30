@@ -12,9 +12,9 @@ type User = {
   full_name: string
   phone_number: string
   house_number: string
-  status: string
   roles: { name: string }
   role_id: string
+  is_occupied?: boolean
 }
 
 export default function WargaClient({ initialUsers, roles }: { initialUsers: User[], roles: Role[] }) {
@@ -120,8 +120,12 @@ export default function WargaClient({ initialUsers, roles }: { initialUsers: Use
                       {user.full_name}
                       <div className="text-xs text-gray-500 font-normal mt-0.5">{user.phone_number || '-'}</div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                    <td className="px-6 py-4 text-gray-600">{user.house_number || '-'}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {user.house_number || '-'}
+                      {user.is_occupied === false && (
+                        <span className="block mt-1 px-2 py-0.5 w-fit rounded text-[10px] bg-gray-100 text-gray-500 font-medium">Kosong</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
                         user.roles?.name === 'Superadmin' ? 'bg-purple-100 text-purple-700' :
@@ -200,9 +204,18 @@ export default function WargaClient({ initialUsers, roles }: { initialUsers: Use
                   </select>
                 </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-700">No. HP / WhatsApp</label>
-                <input name="phone_number" type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Status Huni</label>
+                  <select name="is_occupied" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="true">Ditempati</option>
+                    <option value="false">Kosong / Belum Ditempati</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">No. HP / WhatsApp</label>
+                  <input name="phone_number" type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
               </div>
               
               <div className="pt-4 mt-6 border-t border-gray-100 flex justify-end gap-2">
@@ -257,10 +270,17 @@ export default function WargaClient({ initialUsers, roles }: { initialUsers: Use
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-700">No. HP / WhatsApp</label>
+                  <label className="text-sm font-medium text-gray-700">No. HP / WA</label>
                   <input name="phone_number" type="text" defaultValue={editUser.phone_number} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Status Huni</label>
+                  <select name="is_occupied" defaultValue={editUser.is_occupied === false ? "false" : "true"} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="true">Ditempati</option>
+                    <option value="false">Kosong / Belum Ditempati</option>
+                  </select>
                 </div>
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700">Status Akun</label>
